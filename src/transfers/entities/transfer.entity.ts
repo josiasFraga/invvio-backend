@@ -26,7 +26,7 @@ export class Transfer {
   receiverUserId: string;
 
   @Column({ type: 'decimal', precision: 36, scale: 18 })
-  amount: string;
+  amount: number;
 
   @Column({
     type: 'enum',

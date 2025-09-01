@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsNumberString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsNotEmpty, IsOptional, IsString, IsNumberString, IsNumber } from 'class-validator';
 
 export class CreateTransferDto {
   @ApiProperty({ example: '0x1234567890abcdef1234567890abcdef12345678', required: false })
@@ -12,8 +13,18 @@ export class CreateTransferDto {
   @IsOptional()
   toUserId?: string;
 
-  @ApiProperty({ example: '100.50' })
-  @IsNumberString()
+  @ApiProperty({ example: '3.850,00' })
+  @Type(() => String)
+  @Transform(({ value }) => {   
+    // Remove pontos de milhar e troca vírgula por ponto
+    value = value.replace('.', '');
+    value = value.replace('.', '');
+    value = value.replace('.', '');
+    value = value.replace(',', '.');
+    console.log('value:', value);
+    return parseFloat(value);
+  })
+  @IsNumber()
   @IsNotEmpty()
-  amount: string;
+  amount: number;
 }

@@ -1,6 +1,6 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike } from 'typeorm';
+import { Repository, ILike, Not } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
@@ -54,23 +54,25 @@ export class UsersService {
     return user;
   }
 
-  async searchUsers(query: string): Promise<Partial<User>[]> {
-    const users = await this.usersRepository.find({
-      where: [
-        { nickname: ILike(`%${query}%`) },
-        { email: ILike(`%${query}%`) },
-        { wallet: ILike(`%${query}%`) },
-      ],
-      take: 20,
-      select: ['id', 'nickname', 'wallet', 'photoUrl'],
-    });
+  async searchUsers(userId: string, query: string): Promise<Partial<User>[]> {
+    const q = `%${query}%`;
 
-    // Retornar apenas campos públicos seguros
-    return users.map(user => ({
-      id: user.id,
-      nickname: user.nickname,
-      wallet: user.wallet,
-      photoUrl: user.photoUrl,
+    const users = await this.usersRepository
+      .createQueryBuilder('u')
+      .select(['u.id', 'u.nickname', 'u.wallet', 'u.photoUrl'])
+      .where('u.id != :userId', { userId })
+      .andWhere(
+        '(u.nickname LIKE :q OR u.email LIKE :q OR u.wallet LIKE :q)',
+        { q },
+      )
+      .limit(20)
+      .getMany();
+
+    return users.map(u => ({
+      id: u.id,
+      nickname: u.nickname,
+      wallet: u.wallet,
+      photoUrl: u.photoUrl,
     }));
   }
 

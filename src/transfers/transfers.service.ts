@@ -21,8 +21,7 @@ export class TransfersService {
       throw new BadRequestException('toUserId or toWallet must be provided');
     }
 
-    const value = parseFloat(amount);
-    if (isNaN(value) || value <= 0) {
+    if (isNaN(amount) || amount <= 0) {
       throw new BadRequestException('Amount must be a positive number string');
     }
 
@@ -33,7 +32,7 @@ export class TransfersService {
 
     // TypeORM may return decimal columns as strings. Convertemos explicitamente para número.
     const senderBalanceNum = Number(sender.balance) || 0;
-    if (senderBalanceNum < value) {
+    if (senderBalanceNum < amount) {
       throw new BadRequestException('Insufficient balance');
     }
 
@@ -52,8 +51,8 @@ export class TransfersService {
     const receiverBalanceNum = Number(receiver.balance) || 0;
 
     // Atualiza saldos usando valores numéricos e toFixed para limitar precisão
-    sender.balance = Number((senderBalanceNum - value).toFixed(8));
-    receiver.balance = Number((receiverBalanceNum + value).toFixed(8));
+    sender.balance = Number((senderBalanceNum - amount).toFixed(8));
+    receiver.balance = Number((receiverBalanceNum + amount).toFixed(8));
 
     const transfer = this.transferRepository.create({
       senderUserId: sender.id,

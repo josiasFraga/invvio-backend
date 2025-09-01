@@ -5,6 +5,8 @@ import {
   Body,
   UseGuards,
   Query,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -59,6 +61,41 @@ export class UsersController {
   })
   async getBalance(@GetUser() user: User) {
     return this.usersService.getBalance(user.id);
+  }
+
+  @Get('data')
+  @ApiOperation({ summary: 'Get current user data' })
+  @ApiResponse({
+    status: 200,
+    description: 'User data retrieved successfully',
+    schema: {
+      example: {
+        id: 'uuid',
+        nickname: 'johndoe',
+        wallet: '0x123...',
+        photoUrl: 'https://example.com/photo.jpg',
+      },
+    },
+  })
+  async getData(
+    @Query('userId') userId: string
+  ) {
+
+    if ( !userId ) {
+      throw new BadRequestException('userId query parameter is required');
+    }
+    const userData = await this.usersService.findOne(userId);
+
+    if ( !userData ) {
+      throw new NotFoundException('User not found');
+    }
+  
+    return {
+      id: userData.id,
+      nickname: userData.nickname,
+      wallet: userData.wallet,
+      photoUrl: userData.photoUrl,
+    };
   }
 
   @Patch('me/photo')
@@ -137,10 +174,13 @@ export class UsersController {
       ],
     },
   })
-  async searchUsers(@Query('query') query: string) {
+  async searchUsers(
+    @GetUser() user: User,
+    @Query('query') query: string
+  ) {
     if (!query) {
       return [];
     }
-    return this.usersService.searchUsers(query);
+    return this.usersService.searchUsers(user.id, query);
   }
 }

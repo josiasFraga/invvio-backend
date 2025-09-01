@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { TransfersService } from './transfers.service';
 import { CreateTransferDto } from './dto/create-transfer.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -11,6 +11,7 @@ export class TransfersController {
   constructor(private readonly transfersService: TransfersService) {}
 
   @Post()
+  //@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async createTransfer(@GetUser() user: User, @Body() createTransferDto: CreateTransferDto) {
     return this.transfersService.createTransfer(user.id, createTransferDto);
   }
