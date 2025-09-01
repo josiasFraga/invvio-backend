@@ -48,6 +48,19 @@ export class UsersController {
     return this.usersService.findOne(user.id);
   }
 
+  @Get('balance')
+  @ApiOperation({ summary: 'Get current user balance' })
+  @ApiResponse({
+    status: 200,
+    description: 'User balance retrieved successfully',
+    schema: {
+      example: 100.50
+    },
+  })
+  async getBalance(@GetUser() user: User) {
+    return this.usersService.getBalance(user.id);
+  }
+
   @Patch('me/photo')
   @ApiOperation({ summary: 'Update user photo URL' })
   @ApiResponse({
@@ -113,11 +126,13 @@ export class UsersController {
           id: 'uuid',
           nickname: 'johndoe',
           wallet: '0x123...',
+          photoUrl: 'https://example.com/photo.jpg',
         },
         {
           id: 'uuid2',
           nickname: 'janedoe',
           wallet: '0x456...',
+          photoUrl: 'https://example.com/photo2.jpg',
         },
       ],
     },

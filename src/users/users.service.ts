@@ -62,7 +62,7 @@ export class UsersService {
         { wallet: ILike(`%${query}%`) },
       ],
       take: 20,
-      select: ['id', 'nickname', 'wallet'],
+      select: ['id', 'nickname', 'wallet', 'photoUrl'],
     });
 
     // Retornar apenas campos públicos seguros
@@ -70,6 +70,7 @@ export class UsersService {
       id: user.id,
       nickname: user.nickname,
       wallet: user.wallet,
+      photoUrl: user.photoUrl,
     }));
   }
 
