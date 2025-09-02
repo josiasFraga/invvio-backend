@@ -1,6 +1,7 @@
-import { Controller, Post, Get, Body, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Query } from '@nestjs/common';
 import { TransfersService } from './transfers.service';
 import { CreateTransferDto } from './dto/create-transfer.dto';
+import { ListTransfersDto } from './dto/list-transfers.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -17,7 +18,10 @@ export class TransfersController {
   }
 
   @Get()
-  async findTransfers(@GetUser() user: User) {
-    return this.transfersService.findTransfers(user.id);
+  async findTransfers(@GetUser() user: User, @Query() query: ListTransfersDto) {
+    return this.transfersService.findTransfers(user.id, {
+      limit: query.limit,
+      offset: query.offset,
+    });
   }
 }

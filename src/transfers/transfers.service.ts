@@ -65,12 +65,40 @@ export class TransfersService {
     return this.transferRepository.save(transfer);
   }
 
-  async findTransfers(userId: string): Promise<Transfer[]> {
-    return this.transferRepository.find({
-      where: [
-        { senderUserId: userId },
-        { receiverUserId: userId },
-      ],
-    });
+  async findTransfers(
+    userId: string,
+    options?: { limit?: number; offset?: number }
+  ): Promise<(Transfer & { type: 'sended' | 'received' })[]> {
+    const { limit = 20, offset = 0 } = options || {};
+    const qb = this.transferRepository.createQueryBuilder('transfer')
+    .leftJoinAndSelect('transfer.senderUser', 'senderUser')
+    .leftJoinAndSelect('transfer.receiverUser', 'receiverUser');
+    qb.where('transfer.senderUserId = :userId', { userId })
+      .orWhere('transfer.receiverUserId = :userId', { userId })
+      .select([
+        'transfer.id',
+        'transfer.amount',
+        'transfer.createdAt',
+        'transfer.senderUserId',
+        'transfer.receiverUserId',
+
+        'senderUser.id',
+        'senderUser.nickname',
+        'senderUser.wallet',
+        'senderUser.photoUrl',
+
+        'receiverUser.id',
+        'receiverUser.nickname',
+        'receiverUser.wallet',
+        'receiverUser.photoUrl',
+      ])
+      .orderBy('transfer.createdAt', 'DESC')
+      .take(limit)
+      .skip(offset);
+    const transfers = await qb.getMany();
+    return transfers.map(t => ({
+      ...t,
+      type: t.senderUserId === userId ? 'sended' : 'received',
+    }));
   }
 }
