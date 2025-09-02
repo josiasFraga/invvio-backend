@@ -1,9 +1,10 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike, Not } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -87,5 +88,27 @@ export class UsersService {
   async getBalance(userId: string): Promise<number> {
     const user = await this.findOne(userId);
     return Number(user.balance);
+  }
+
+  
+
+  async changePassword(userId: string, newPassword: string): Promise<void> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+
+    console.log(user);
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt();
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    // Update the user's password
+    user.passwordHash = passwordHash;
+    await this.usersRepository.save(user);
   }
 }

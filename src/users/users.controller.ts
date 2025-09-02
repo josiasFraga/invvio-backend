@@ -7,6 +7,8 @@ import {
   Query,
   BadRequestException,
   NotFoundException,
+  Post,
+  Put,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,6 +22,7 @@ import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { User } from './entities/user.entity';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -182,5 +185,15 @@ export class UsersController {
       return [];
     }
     return this.usersService.searchUsers(user.id, query);
+  }
+
+  
+
+  @Put('change-password')
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async changePassword(@GetUser() user: User, @Body() changePasswordDto: ChangePasswordDto) {
+    return this.usersService.changePassword(user.id, changePasswordDto.password);
   }
 }
