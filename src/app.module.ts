@@ -12,6 +12,7 @@ import { EmailValidationCode } from './email-validation-codes/entities/email-val
 import { EmailValidationCodesModule } from './email-validation-codes/email-validation-codes.module';
 import { EmailModule } from './email/email.module';
 import { AwsModule } from './aws/aws.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AwsModule } from './aws/aws.module';
     EmailValidationCodesModule,
     EmailModule,
     AwsModule,
+    UploadModule,
   ],
   controllers: [],
   providers: [],

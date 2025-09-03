@@ -7,8 +7,9 @@ import {
   Query,
   BadRequestException,
   NotFoundException,
-  Post,
   Put,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,13 +24,18 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { User } from './entities/user.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { UploadService } from 'src/upload/upload.service';
 
 @ApiTags('users')
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly uploadService: UploadService
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get current user profile' })
@@ -101,7 +107,7 @@ export class UsersController {
     };
   }
 
-  @Patch('me/photo')
+  @Put('me/photo')
   @ApiOperation({ summary: 'Update user photo URL' })
   @ApiResponse({
     status: 200,
@@ -119,11 +125,33 @@ export class UsersController {
       },
     },
   })
+  @UseInterceptors(FileFieldsInterceptor([
+      { name: 'photo', maxCount: 1 },
+  ]))
   async updatePhoto(
     @GetUser() user: User,
-    @Body() updatePhotoDto: UpdatePhotoDto,
+    @UploadedFiles()
+    files: {
+        photo?: Express.Multer.File[];
+    },
   ) {
-    return this.usersService.updatePhoto(user.id, updatePhotoDto);
+    
+    const fileImg = files?.photo?.[0];
+
+    if ( !fileImg ) {
+      throw new BadRequestException('Photo file is required');
+    }
+  
+    let uploadedImg: any = null;
+		uploadedImg = await this.uploadService.uploadAndProcess(
+      fileImg,
+      'users',
+      true, // round = true (se quiser foto redonda no thumb)
+		);
+
+		const photoUrl = uploadedImg.originalUrl;
+
+    return this.usersService.updatePhoto(user.id, { photoUrl });
   }
 
   @Patch('me/wallet')
