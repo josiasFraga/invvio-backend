@@ -1,3 +1,4 @@
+import { NotificationMotive } from './notification-motive.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
@@ -19,7 +20,7 @@ export class UserNotification {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'uuid', nullable: true, length: 36 })
   originUserId?: string;
 
   @ManyToOne(() => User, { nullable: true })
@@ -34,6 +35,17 @@ export class UserNotification {
 
   @Column({ type: 'text' })
   message: string;
+
+  @Column({ type: 'uuid', nullable: true, length: 36 })
+  registerId?: string;
+
+
+  @Column({ type: 'uuid', nullable: true })
+  notificationMotiveId?: string;
+
+  @ManyToOne(() => NotificationMotive, { nullable: true })
+  @JoinColumn({ name: 'notificationMotiveId' })
+  notificationMotive?: NotificationMotive;
 
   @Column({ type: 'boolean', default: false })
   read: boolean;

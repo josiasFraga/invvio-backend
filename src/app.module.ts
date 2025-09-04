@@ -16,6 +16,7 @@ import { AwsModule } from './aws/aws.module';
 import { UploadModule } from './upload/upload.module';
 import { UserNotification } from './notifications/entities/user-notification.entity';
 import { NotificationsModule } from './notifications/notifications.module';
+import { NotificationMotive } from './notifications/entities/notification-motive.entity';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { NotificationsModule } from './notifications/notifications.module';
         username: configService.get('DB_USER', 'root'),
         password: configService.get('DB_PASS', ''),
         database: configService.get('DB_NAME', 'invvio'),
-        entities: [User, Transfer, PasswordResetToken, EmailValidationCode, NotificationId, UserNotification],
+        entities: [User, Transfer, PasswordResetToken, EmailValidationCode, NotificationId, UserNotification, NotificationMotive],
         synchronize: configService.get('NODE_ENV', 'development') === 'development',
         logging: configService.get('NODE_ENV', 'development') === 'development',
       }),

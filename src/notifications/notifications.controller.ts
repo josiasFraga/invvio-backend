@@ -17,4 +17,11 @@ export class NotificationsController {
     ): Promise<UserNotification[]> {
         return this.notificationsService.findAll(user.id, query);
     }
+
+    @Get('count-not-read')
+    async countNotRead(
+        @GetUser() user: User,
+    ): Promise<number> {
+        return this.notificationsService.countNotRead(user.id);
+    }
 }
