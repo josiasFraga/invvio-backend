@@ -156,9 +156,9 @@ export class NotificationsService {
         }
 
         return this.saveNotification({
-            id_one_signal: notificationIdOneSignal,
-            registro_id: idRegister,
-            notificacao_motivo_id: mountedMesage.extraData.motivo_id,
+            oneSignalId: notificationIdOneSignal,
+            registerId: idRegister,
+            motiveId: mountedMesage.extraData.motiveId,
             agendamento_data_hora: null,
             title: mountedMesage.finalTitle,
             message: mountedMesage.finalMessage,
@@ -167,8 +167,8 @@ export class NotificationsService {
             large_icon: mountedMesage.largeIcon,
             acao_selecionada: extraData?.acao_selecionada || null,
             acao_selecionada_desc: extraData?.acao_selecionada_desc || null,
-            usuario_origem: originUserId,
-            usuario_id: destinyUserId,
+            originUserId,
+            destinyUserId,
         });
 	}
 
@@ -192,7 +192,7 @@ export class NotificationsService {
 	}> {
 	
 		const extraData = {
-			registro_id: params.idRegister,
+			registerId: params.idRegister,
 			motivo: motive,
 		};
 	
@@ -224,7 +224,9 @@ export class NotificationsService {
 			};
 		}
 
-		extraData['motivo_id'] = motiveDados.id;
+        msg = motiveDados.message;
+        title = motiveDados.title;
+		extraData['motiveId'] = motiveDados.id;
 	
 		let originUser: User | null = null;
 		if ( params.originUserId ) {
@@ -243,9 +245,9 @@ export class NotificationsService {
 				largeIcon = this.thumbsService.getRoundThumbFromImage(originUser.photoUrl);
 			}
 
-			title = motiveDados.title
+			title = title
 				.replace('{{origin_name}}', originUser?.nickname || '');
-			msg = motiveDados.message
+			msg = msg
 				.replace('{{origin_name}}', originUser?.nickname || '');
 		}
 
@@ -262,10 +264,10 @@ export class NotificationsService {
 				}
 			});
 
-			title = motiveDados.title
-				.replace('{{destiny_name}}', originUser?.nickname || '');
-			msg = motiveDados.message
-				.replace('{{destiny_name}}', originUser?.nickname || '');
+			title = title
+				.replace('{{destiny_name}}', destinyUser?.nickname || '');
+			msg = msg
+				.replace('{{destiny_name}}', destinyUser?.nickname || '');
 		}
 
 		if ( motive === 'transfer_received' ) {

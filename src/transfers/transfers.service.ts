@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Transfer, TransferStatus } from './entities/transfer.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateTransferDto } from './dto/create-transfer.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class TransfersService {
@@ -12,6 +13,8 @@ export class TransfersService {
     private readonly transferRepository: Repository<Transfer>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    private readonly notificationsService: NotificationsService
   ) {}
 
   async createTransfer(userId: string, createTransferDto: CreateTransferDto): Promise<Transfer> {
@@ -54,15 +57,34 @@ export class TransfersService {
     sender.balance = Number((senderBalanceNum - amount).toFixed(8));
     receiver.balance = Number((receiverBalanceNum + amount).toFixed(8));
 
-    const transfer = this.transferRepository.create({
-      senderUserId: sender.id,
-      receiverUserId: receiver.id,
-      amount,
-      status: TransferStatus.SUCCESS,
-    });
 
-    await this.userRepository.save([sender, receiver]);
-    return this.transferRepository.save(transfer);
+    try {
+
+      const transfer = this.transferRepository.create({
+        senderUserId: sender.id,
+        receiverUserId: receiver.id,
+        amount,
+        status: TransferStatus.SUCCESS,
+      });
+
+      await this.userRepository.save([sender, receiver]);
+      const savedTransfer = await this.transferRepository.save(transfer);
+
+      // Envia notificação
+      this.notificationsService.sendNotification(
+          sender.id, 
+          receiver.id, 
+          'transfer_received', 
+          savedTransfer.id,
+          true,
+          { en: '$[notif_count] Transferência recebida' },
+      );
+
+      return savedTransfer;
+
+    } catch (error) {
+      console.error('Error creating transfer:', error);
+    }
   }
 
   async findTransfers(
