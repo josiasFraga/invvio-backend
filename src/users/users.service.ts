@@ -4,6 +4,7 @@ import { Repository, ILike, Not } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
+import { NotificationId } from 'src/notifications/entities/notification-id.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -11,6 +12,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(NotificationId)
+    private notificationIdsRepository: Repository<NotificationId>,
   ) {}
 
   async findOne(id: string): Promise<User> {
@@ -90,14 +93,10 @@ export class UsersService {
     return Number(user.balance);
   }
 
-  
-
   async changePassword(userId: string, newPassword: string): Promise<void> {
     const user = await this.usersRepository.findOne({
       where: { id: userId },
     });
-
-    console.log(user);
 
     if (!user) {
       throw new UnauthorizedException();
@@ -111,4 +110,15 @@ export class UsersService {
     user.passwordHash = passwordHash;
     await this.usersRepository.save(user);
   }
+
+  async saveNotificationId(userId: string, notificationId: string): Promise<NotificationId> {
+    // Verifica se já existe notificationId
+    const existing = await this.notificationIdsRepository.findOne({ where: { userId, notificationId } });
+    if (existing) {
+      return existing;
+    }
+    const notification = this.notificationIdsRepository.create({ userId, notificationId });
+    return this.notificationIdsRepository.save(notification);
+  }
+
 }

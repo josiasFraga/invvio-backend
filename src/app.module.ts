@@ -9,10 +9,13 @@ import { User } from './users/entities/user.entity';
 import { Transfer } from './transfers/entities/transfer.entity';
 import { PasswordResetToken } from './password-reset/entities/password-reset-token.entity';
 import { EmailValidationCode } from './email-validation-codes/entities/email-validation-code.entity';
+import { NotificationId } from './notifications/entities/notification-id.entity';
 import { EmailValidationCodesModule } from './email-validation-codes/email-validation-codes.module';
 import { EmailModule } from './email/email.module';
 import { AwsModule } from './aws/aws.module';
 import { UploadModule } from './upload/upload.module';
+import { UserNotification } from './notifications/entities/user-notification.entity';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -29,7 +32,7 @@ import { UploadModule } from './upload/upload.module';
         username: configService.get('DB_USER', 'root'),
         password: configService.get('DB_PASS', ''),
         database: configService.get('DB_NAME', 'invvio'),
-        entities: [User, Transfer, PasswordResetToken, EmailValidationCode],
+        entities: [User, Transfer, PasswordResetToken, EmailValidationCode, NotificationId, UserNotification],
         synchronize: configService.get('NODE_ENV', 'development') === 'development',
         logging: configService.get('NODE_ENV', 'development') === 'development',
       }),
@@ -43,6 +46,7 @@ import { UploadModule } from './upload/upload.module';
     EmailModule,
     AwsModule,
     UploadModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [],

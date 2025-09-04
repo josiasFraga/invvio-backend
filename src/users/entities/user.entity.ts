@@ -11,6 +11,8 @@ import {
 import { Transfer } from '../../transfers/entities/transfer.entity';
 import { PasswordResetToken } from '../../password-reset/entities/password-reset-token.entity';
 import { Exclude } from 'class-transformer';
+import { NotificationId } from '../../notifications/entities/notification-id.entity';
+import { UserNotification } from '../../notifications/entities/user-notification.entity';
 
 @Entity('users')
 export class User {
@@ -50,6 +52,15 @@ export class User {
 
   @OneToMany(() => PasswordResetToken, (token) => token.user)
   passwordResetTokens: PasswordResetToken[];
+
+  @OneToMany(() => NotificationId, (notification) => notification.user)
+  notificationIds: NotificationId[];
+
+  @OneToMany(() => UserNotification, (notification) => notification.user)
+  userNotifications: UserNotification[];
+
+  @OneToMany(() => UserNotification, (notification) => notification.originUser)
+  originatedNotifications: UserNotification[];
 
   @BeforeInsert()
   @BeforeUpdate()

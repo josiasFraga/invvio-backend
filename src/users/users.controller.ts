@@ -10,6 +10,7 @@ import {
   Put,
   UseInterceptors,
   UploadedFiles,
+  Post,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -215,13 +216,18 @@ export class UsersController {
     return this.usersService.searchUsers(user.id, query);
   }
 
-  
-
   @Put('change-password')
   @ApiOperation({ summary: 'Change user password' })
   @ApiResponse({ status: 200, description: 'Password changed successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async changePassword(@GetUser() user: User, @Body() changePasswordDto: ChangePasswordDto) {
     return this.usersService.changePassword(user.id, changePasswordDto.password);
+  }
+
+  @Post('me/notifications-id')
+  @ApiOperation({ summary: 'Save user notification ID' })
+  @ApiResponse({ status: 201, description: 'Notification ID saved successfully' })
+  async saveNotificationId(@GetUser() user: User, @Body() body: { notificationId: string }) {
+    return this.usersService.saveNotificationId(user.id, body.notificationId);
   }
 }
