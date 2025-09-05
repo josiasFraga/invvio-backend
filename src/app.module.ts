@@ -17,6 +17,7 @@ import { UploadModule } from './upload/upload.module';
 import { UserNotification } from './notifications/entities/user-notification.entity';
 import { NotificationsModule } from './notifications/notifications.module';
 import { NotificationMotive } from './notifications/entities/notification-motive.entity';
+import { DepositsModule } from './deposits/deposits.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { NotificationMotive } from './notifications/entities/notification-motive
     AwsModule,
     UploadModule,
     NotificationsModule,
+    DepositsModule,
   ],
   controllers: [],
   providers: [],
