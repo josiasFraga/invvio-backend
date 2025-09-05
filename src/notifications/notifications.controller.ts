@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from 'src/users/entities/user.entity';
@@ -23,5 +23,13 @@ export class NotificationsController {
         @GetUser() user: User,
     ): Promise<number> {
         return this.notificationsService.countNotRead(user.id);
+    }
+
+    @Post('mark-as-read/:notificationId')
+    async markAsRead(
+        @GetUser() user: User,
+        @Param('notificationId') notificationId: string,
+    ): Promise<{ status: string; message: string }> {
+        return this.notificationsService.setAsRead(user.id, notificationId);
     }
 }

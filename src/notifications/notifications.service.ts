@@ -40,6 +40,7 @@ export class NotificationsService {
 		const queryBuilder = this.notificationsRepository
 			.createQueryBuilder('notification')
 			.leftJoinAndSelect('notification.originUser', 'originUser')
+			.leftJoinAndSelect('notification.notificationMotive', 'motive')
 			.where('notification.userId = :userId', { userId })
 			.select([
 				'notification.id',
@@ -53,6 +54,9 @@ export class NotificationsService {
 				'originUser.id',
 				'originUser.nickname',
 				'originUser.photoUrl',
+
+				'motive.id',
+				'motive.motive',
 			])
 			.orderBy('notification.createdAt', 'DESC')
 			.skip(offset)
