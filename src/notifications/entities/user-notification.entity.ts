@@ -27,8 +27,8 @@ export class UserNotification {
   @JoinColumn({ name: 'originUserId' })
   originUser?: User;
 
-  @Column({ type: 'varchar', length: 128 })
-  notificationId: string;
+  @Column({ type: 'varchar', length: 128, nullable: true })
+  notificationId: string | null;
 
   @Column({ type: 'varchar', length: 255 })
   title: string;

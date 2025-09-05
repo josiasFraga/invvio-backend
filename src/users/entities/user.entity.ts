@@ -13,7 +13,7 @@ import { PasswordResetToken } from '../../password-reset/entities/password-reset
 import { Exclude } from 'class-transformer';
 import { NotificationId } from '../../notifications/entities/notification-id.entity';
 import { UserNotification } from '../../notifications/entities/user-notification.entity';
-
+import { Charge } from '../../charges/entities/charge.entity';
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -61,6 +61,12 @@ export class User {
 
   @OneToMany(() => UserNotification, (notification) => notification.originUser)
   originatedNotifications: UserNotification[];
+
+  @OneToMany(() => Charge, (charge) => charge.creatorUser)
+  createdCharges: Charge[];
+
+  @OneToMany(() => Charge, (charge) => charge.targetUser)
+  receivedCharges: Charge[];
 
   @BeforeInsert()
   @BeforeUpdate()

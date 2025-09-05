@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { Transfer } from 'src/transfers/entities/transfer.entity';
 import { ThumbsService } from './thumbs/thumbs.service';
 import { NotificationId } from './entities/notification-id.entity';
+import { Charge } from '../charges/entities/charge.entity';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 
@@ -23,6 +24,8 @@ export class NotificationsService {
         private transferRepository: Repository<Transfer>,
 		@InjectRepository(NotificationId)
         private notificationIdRepository: Repository<NotificationId>,
+		@InjectRepository(Charge)
+        private chargeRepository: Repository<Charge>,
 
         private readonly thumbsService: ThumbsService,
 		private readonly httpService: HttpService
@@ -295,6 +298,26 @@ export class NotificationsService {
 
             msg = msg.replace('{{transfer_value}}', transferData.amount.toString());
 
+		} else if ( motive === 'charge_received' ) {
+
+			const chargeData = await this.chargeRepository.findOne({
+				where: {
+					id: params.idRegister
+				}
+			});
+
+			if ( !chargeData ) {
+				return {
+					status: 'error',
+					statusMessage: 'Cobrança não encontrada!',
+					finalMessage: '',
+					finalTitle: '',
+					largeIcon: null,
+					extraData,
+				};
+			}
+
+            msg = msg.replace('{{charge_value}}', chargeData.amount.toString());
 		}
 
 		return {

@@ -1,3 +1,4 @@
+import { Charge } from './charges/entities/charge.entity';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,6 +19,7 @@ import { UserNotification } from './notifications/entities/user-notification.ent
 import { NotificationsModule } from './notifications/notifications.module';
 import { NotificationMotive } from './notifications/entities/notification-motive.entity';
 import { DepositsModule } from './deposits/deposits.module';
+import { ChargesModule } from './charges/charges.module';
 
 @Module({
   imports: [
@@ -34,7 +36,7 @@ import { DepositsModule } from './deposits/deposits.module';
         username: configService.get('DB_USER', 'root'),
         password: configService.get('DB_PASS', ''),
         database: configService.get('DB_NAME', 'invvio'),
-        entities: [User, Transfer, PasswordResetToken, EmailValidationCode, NotificationId, UserNotification, NotificationMotive],
+        entities: [User, Transfer, PasswordResetToken, EmailValidationCode, NotificationId, UserNotification, NotificationMotive, Charge],
         synchronize: configService.get('NODE_ENV', 'development') === 'development',
         logging: configService.get('NODE_ENV', 'development') === 'development',
       }),
@@ -50,6 +52,7 @@ import { DepositsModule } from './deposits/deposits.module';
     UploadModule,
     NotificationsModule,
     DepositsModule,
+    ChargesModule,
   ],
   controllers: [],
   providers: [],

@@ -9,9 +9,10 @@ import { Transfer } from 'src/transfers/entities/transfer.entity';
 import { NotificationId } from './entities/notification-id.entity';
 import { ThumbsModule } from './thumbs/thumbs.module';
 import { HttpModule } from '@nestjs/axios';
+import { Charge } from 'src/charges/entities/charge.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserNotification, NotificationMotive, User, Transfer, NotificationId]),
+    TypeOrmModule.forFeature([UserNotification, NotificationMotive, User, Transfer, NotificationId, Charge]),
     ThumbsModule,
     HttpModule,
   ],

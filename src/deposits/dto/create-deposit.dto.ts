@@ -11,7 +11,6 @@ export class CreateDepositDto {
     value = value.replace('.', '');
     value = value.replace('.', '');
     value = value.replace(',', '.');
-    console.log('value:', value);
     return parseFloat(value);
   })
   @IsNumber()
