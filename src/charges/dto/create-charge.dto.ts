@@ -5,7 +5,7 @@ import { IsUUID, IsNotEmpty, IsISO8601, IsNumber } from 'class-validator';
 export class CreateChargeDto {
     @ApiProperty({ example: 'uuid-of-target-user' })
     @IsUUID()
-    targetUserId: string;
+    toUserId: string;
 
     @ApiProperty({ example: '3.850,00' })
     @Type(() => String)

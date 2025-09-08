@@ -18,23 +18,37 @@ export class ChargesService {
 	) {}
 
 	async createCharge(creatorUserId: string, dto: CreateChargeDto): Promise<Charge> {
-		const { targetUserId, amount } = dto;
+		const { toUserId, amount } = dto;
 
-		if (creatorUserId === targetUserId) {
+		if (creatorUserId === toUserId) {
 			throw new BadRequestException('Cannot create charge for yourself');
 		}
 
-		const targetUser = await this.userRepository.findOne({ where: { id: targetUserId } });
+		const targetUser = await this.userRepository.findOne({ where: { id: toUserId } });
 		if (!targetUser) throw new NotFoundException('Target user not found');
 
 		const value = Number(amount);
 		if (isNaN(value) || value <= 0) throw new BadRequestException('Invalid amount');
 
+        // Verifica limite de 3 cobranças ativas (pending + não expiradas) para o usuário destino
+        const now = new Date();
+        const activeCount = await this.chargeRepository.createQueryBuilder('c')
+            .where('c.targetUserId = :targetUserId', { targetUserId: toUserId })
+            .andWhere('c.creatorUserId = :creatorUserId', { creatorUserId })
+            .andWhere('c.status = :status', { status: 'pending' })
+            .andWhere('c.expiresAt > :now', { now })
+            .getCount();
+
+        if (activeCount >= 3) {
+            throw new BadRequestException('Target user already has 3 active charges');
+        }
+
         try {
+
 
             const charge = this.chargeRepository.create({
                 creatorUserId,
-                targetUserId,
+                targetUserId: toUserId,
                 amount: value,
                 expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Expira em 7 dias
             });
@@ -44,7 +58,7 @@ export class ChargesService {
             // Envia notificação
             this.notificationsService.sendNotification(
                 creatorUserId, 
-                targetUserId, 
+                toUserId, 
                 'charge_received', 
                 savedCharge.id,
                 true,
