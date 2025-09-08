@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Query, Param } from '@nestjs/common';
 import { ChargesService } from './charges.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
@@ -20,5 +20,11 @@ export class ChargesController {
 	@Get()
 	async list(@GetUser() user: User, @Query() query: ListChargesDto) {
 		return this.chargesService.listCharges(user.id, { limit: query.limit, offset: query.offset });
+	}
+
+    @UseGuards(JwtAuthGuard)
+    @Get('/:id')
+	async findOne(@GetUser() user: User, @Param('id') id: string) {
+		return this.chargesService.findChargeById(user.id, id);
 	}
 }

@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { Transfer, TransferStatus } from './entities/transfer.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateTransferDto } from './dto/create-transfer.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { Charge } from 'src/charges/entities/charge.entity';
 
 @Injectable()
 export class TransfersService {
@@ -13,6 +14,8 @@ export class TransfersService {
     private readonly transferRepository: Repository<Transfer>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Charge)
+    private readonly chargeRepository: Repository<Charge>,
 
     private readonly notificationsService: NotificationsService
   ) {}
@@ -57,7 +60,15 @@ export class TransfersService {
     sender.balance = Number((senderBalanceNum - amount).toFixed(8));
     receiver.balance = Number((receiverBalanceNum + amount).toFixed(8));
 
+    let chargeData: Charge | null = null;
+    if ( createTransferDto.chargeId ) {
+      chargeData = await this.chargeRepository.findOne({ where: { id: createTransferDto.chargeId, status: 'pending', expiresAt: MoreThan(new Date()) } });
 
+      if ( !chargeData) {
+        throw new NotFoundException('Charge not found');
+      }
+    }
+  
     try {
 
       const transfer = this.transferRepository.create({
@@ -69,6 +80,13 @@ export class TransfersService {
 
       await this.userRepository.save([sender, receiver]);
       const savedTransfer = await this.transferRepository.save(transfer);
+
+      if ( chargeData ) {
+        await this.chargeRepository.save({
+          id: chargeData.id,
+          status: 'paid',
+        });
+      }
 
       // Envia notificação
       this.notificationsService.sendNotification(

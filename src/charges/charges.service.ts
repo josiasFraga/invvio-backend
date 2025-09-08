@@ -65,7 +65,8 @@ export class ChargesService {
             .leftJoinAndSelect('charge.creatorUser', 'creatorUser')
             .leftJoinAndSelect('charge.targetUser', 'targetUser')
             .where('charge.expiresAt > :now', { now: new Date() })
-			.where('(charge.creatorUserId = :userId OR charge.targetUserId = :userId)', { userId })
+            .andWhere('charge.status = :status', { status: 'pending' })
+			.andWhere('(charge.creatorUserId = :userId OR charge.targetUserId = :userId)', { userId })
             .select([
                 'charge.id',
                 'charge.amount',
@@ -92,4 +93,39 @@ export class ChargesService {
 				type: c.creatorUserId === userId ? 'sent' : 'received',
 			}));
 	}
+
+    async findChargeById(userId: string, chargeId: string): Promise<Charge> {
+        const query = this.chargeRepository.createQueryBuilder('charge')
+            .leftJoinAndSelect('charge.creatorUser', 'creatorUser')
+            .leftJoinAndSelect('charge.targetUser', 'targetUser')
+            .where('charge.id = :chargeId', { chargeId })
+            .andWhere('charge.expiresAt > :now', { now: new Date() })
+            .andWhere('charge.status = :status', { status: 'pending' })
+            .andWhere('(charge.creatorUserId = :userId OR charge.targetUserId = :userId)', { userId })
+            .select([
+                'charge.id',
+                'charge.amount',
+                'charge.createdAt',
+                'charge.expiresAt',
+                'charge.creatorUserId',
+                'charge.targetUserId',
+
+                'creatorUser.id',
+                'creatorUser.nickname',
+                'creatorUser.photoUrl',
+
+                'targetUser.id',
+                'targetUser.nickname',
+                'targetUser.photoUrl',
+            ]);
+        const charge = await query.getOne();
+
+        if ( !charge ) {
+            throw new NotFoundException('Charge not found');
+        }
+    
+        charge.type = charge.creatorUserId === userId ? 'sent' : 'received';
+    
+        return charge;
+    }
 }

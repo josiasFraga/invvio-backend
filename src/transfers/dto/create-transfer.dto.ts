@@ -27,4 +27,9 @@ export class CreateTransferDto {
   @IsNumber()
   @IsNotEmpty()
   amount: number;
+
+  @ApiProperty({ example: 'uuid-of-charge', required: false })
+  @IsString()
+  @IsOptional()
+  chargeId?: string;
 }

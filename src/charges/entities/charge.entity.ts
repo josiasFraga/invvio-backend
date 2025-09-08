@@ -26,9 +26,14 @@ export class Charge {
   @Column({ type: 'timestamp' })
   expiresAt: Date;
 
+  @Column({ type: 'enum', enum: ['paid', 'pending'], default: 'pending' })
+  status: 'paid' | 'pending';
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  type: 'sent' | 'received';
 }
