@@ -1,5 +1,5 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Post, Body, Get, Query, BadRequestException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -58,5 +58,28 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Get('validate-payid')
+  @ApiOperation({ summary: 'Validate if a payId is available' })
+  @ApiQuery({ name: 'payId', required: true, description: 'Public identifier to validate' })
+  @ApiResponse({
+    status: 200,
+    description: 'Availability result',
+    schema: { example: { available: true } },
+  })
+  @ApiResponse({ status: 400, description: 'Public ID already in use or invalid' })
+  async validatePayId(@Query('payId') payId?: string) {
+    console.log(payId);
+    if (!payId || !payId.trim()) {
+      throw new BadRequestException('payId is required');
+    }
+    const { available } = await this.authService.checkPayIdAvailability(payId);
+
+    console.log(available);
+    if (!available) {
+      throw new BadRequestException('Public ID already in use');
+    }
+    return { available: true };
   }
 }

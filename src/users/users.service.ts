@@ -58,15 +58,30 @@ export class UsersService {
     return user;
   }
 
+  async updatePayId(userId: string, payId: string): Promise<User> {
+    const user = await this.findOne(userId);
+
+    // Verificar se o payId já está em uso
+    const existing = await this.usersRepository.findOne({ where: { payId } });
+    if (existing && existing.id !== userId) {
+      throw new ConflictException('Pay ID already in use');
+    }
+
+    user.payId = payId;
+    await this.usersRepository.save(user);
+    delete user.passwordHash;
+    return user;
+  }
+
   async searchUsers(userId: string, query: string): Promise<Partial<User>[]> {
     const q = `%${query}%`;
 
     const users = await this.usersRepository
       .createQueryBuilder('u')
-      .select(['u.id', 'u.nickname', 'u.wallet', 'u.photoUrl'])
+      .select(['u.id', 'u.nickname', 'u.wallet', 'u.photoUrl', 'u.payId'])
       .where('u.id != :userId', { userId })
       .andWhere(
-        '(u.nickname LIKE :q OR u.email LIKE :q OR u.wallet LIKE :q)',
+  '(u.nickname LIKE :q OR u.email LIKE :q OR u.wallet LIKE :q OR u.payId LIKE :q)',
         { q },
       )
       .limit(20)
@@ -77,6 +92,7 @@ export class UsersService {
       nickname: u.nickname,
       wallet: u.wallet,
       photoUrl: u.photoUrl,
+      payId: u.payId,
     }));
   }
 

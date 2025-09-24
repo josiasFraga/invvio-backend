@@ -21,6 +21,7 @@ import {
 import { UsersService } from './users.service';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
+import { UpdatePayIdDto } from './dto/update-payid.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { User } from './entities/user.entity';
@@ -49,6 +50,7 @@ export class UsersController {
         nickname: 'johndoe',
         email: 'john@example.com',
         wallet: '0x123...',
+  payId: 'johndoe@exemplo.com',
         photoUrl: 'https://example.com/photo.jpg',
         balance: 100.50,
         createdAt: '2024-01-01T00:00:00.000Z',
@@ -83,6 +85,7 @@ export class UsersController {
         id: 'uuid',
         nickname: 'johndoe',
         wallet: '0x123...',
+  payId: 'johndoe@exemplo.com',
         photoUrl: 'https://example.com/photo.jpg',
       },
     },
@@ -104,6 +107,7 @@ export class UsersController {
       id: userData.id,
       nickname: userData.nickname,
       wallet: userData.wallet,
+  payId: (userData as any).payId,
       photoUrl: userData.photoUrl,
     };
   }
@@ -165,7 +169,8 @@ export class UsersController {
         id: 'uuid',
         nickname: 'johndoe',
         email: 'john@example.com',
-        wallet: '0xnewwallet...',
+  wallet: '0xnewwallet...',
+  payId: 'johndoe@exemplo.com',
         photoUrl: 'https://example.com/photo.jpg',
         balance: 100.50,
         createdAt: '2024-01-01T00:00:00.000Z',
@@ -182,6 +187,23 @@ export class UsersController {
     @Body() updateWalletDto: UpdateWalletDto,
   ) {
     return this.usersService.updateWallet(user.id, updateWalletDto);
+  }
+
+  @Patch('me/pay-id')
+  @ApiOperation({ summary: 'Update user public ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Public ID updated successfully',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Public ID already in use',
+  })
+  async updatePayId(
+    @GetUser() user: User,
+    @Body() body: UpdatePayIdDto,
+  ) {
+    return this.usersService.updatePayId(user.id, body.payId);
   }
 
   @Get('search')

@@ -35,6 +35,9 @@ export class User {
   @Column({ unique: true, nullable: true })
   wallet: string;
 
+  @Column({ unique: true })
+  payId: string;
+
   @Column({ type: 'decimal', precision: 18, scale: 2, default: 0 })
   balance: number;
 
